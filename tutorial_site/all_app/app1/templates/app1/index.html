@@ -1,0 +1,12 @@
+<!-- \{% some expression %\} -->
+<!-- \{\{ some variable \}\} -->
+<!-- e.g. -->
+{% if choice_list %}
+	<ul>
+	{% for choice in choice_list %}
+		<li><a href="/app1/hello_world/{{ choice.number }}">{{ choice.choice_text }}</a></li>
+	{% endfor %}
+	</ul>
+{% else %}
+	<p>No questions are available.</p>
+{% endif %}
