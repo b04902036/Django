@@ -170,9 +170,11 @@ then create a directory named the same as the app (not forced, but easier for ma
 then create our html file in it, and we can refer to it later by, say, ```app1.index.html```, credit to some setting in settings.py
 let's create a ```index.html``` and add the following lines into it
 ```
-<!-- \{% some expression %\} -->
-<!-- \{\{ some variable \}\} -->
-<!-- e.g. -->
+{% comment %}
+{% some expression %}
+{{ some variable }}
+{% endcomment %}
+{% if choice_list %}
 {% if choice_list %}
 	<ul>
 	{% for choice in choice_list %}
