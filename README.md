@@ -7,9 +7,10 @@ Since Django has updated to version 2.0, there are several new stuff make creati
  - [make a successful url request](#make-a-successful-url-request)
  - [add model to sql](#add-model-to-sql)
  - [add template](#add-template)
+ - [add form](#add-form)
 ## install and version clarification
 I am using python 3.6.0 and django 2.0.5 on windows 10
-```shell
+```
 pip install django==2.0.5
 ```
 ## create a Django project
@@ -69,7 +70,7 @@ tutorial_site/
  - views.py
    - catch request from urls.py and return some response
  remember to add this app to main project after all set.
- ```
+ ```python
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -116,7 +117,7 @@ urlpatterns = [
 Now we want to add some class into sql table, how to do that?
 Let's go to models.py in app, say ```all_app\app1\models.py```
 add following lines into it
-```
+```python
 from django.db import models
 from django.utils import timezone
 # Create your models here.
@@ -146,7 +147,7 @@ class Choice(models.Model):
 # q.choice_set.create(choice_text='something', number=10)
 ```
 now we've add some model, then register it to app's admin.py, namely ```all_app\app1\admin.py``` to make admin be able to modify it
-```
+```python
 from django.contrib import admin
 from .models import Question, Choice
 # Register your models here.
@@ -169,12 +170,11 @@ first create a directory called ```templates``` under app's directory, namely ``
 then create a directory named the same as the app (not forced, but easier for managing), namely ```all_app\app1\templates\app1```
 then create our html file in it, and we can refer to it later by, say, ```app1.index.html```, credit to some setting in settings.py
 let's create a ```index.html``` and add the following lines into it
-```
+```html
 {% comment %}
 {% some expression %}
 {{ some variable }}
 {% endcomment %}
-{% if choice_list %}
 {% if choice_list %}
 	<ul>
 	{% for choice in choice_list %}
@@ -186,7 +186,7 @@ let's create a ```index.html``` and add the following lines into it
 {% endif %}
 ```
 then add a function in views.py to show this template, open views.py in your app, which should be ```all_app\app1\views.py``` here, and add following lines into it
-```
+```python
 from django.shortcuts import render
 from django.http import HttpResponse
 from django import template
@@ -213,3 +213,46 @@ urlpatterns = [
 ```
 now run your web server and type ```localhost:8000/app1``` and have fun!!!
 P.S. if you see nothing shown up after typing ```localhost:8000/app1``` in your web browser, you probably forgot to add some "Choice" to your database. To do this, either type ```localhost:8000/admin``` or use ```python \path\to\manage.py shell``` to add some.
+## add form
+To create forms in html file easily, we can rely on robust Django.
+Create a file named forms.py under your app directory, which is ```all_app\app1\``` here.
+```python
+from django import forms
+
+class FileForm(forms.Form):
+	file_name = forms.CharField(label='file name', max_length = 100)
+	file = forms.FileField()
+```
+now import ```FileForm``` in views.py and add a new function called upload
+```python
+from .forms import FileForm
+def upload(request):
+	if(request.POST):
+		# create a form instance and populate it with data from the request:
+		form = FileForm(request.POST, request.FILES)
+		# check whether it's valid:
+		if form.is_valid():
+			# process the data in form.cleaned_data as required
+			# ...
+			# redirect to a new URL:
+			f = open('save_uploaded_file', 'wb')
+			for chunk in request.FILES['file'].chunks():
+				f.write(chunk)
+			f.close()
+			return HttpResponseRedirect('/app1')
+	# if a GET (or any other method) we'll create a blank form
+	else:
+		form = FileForm()
+	t = template.loader.get_template('app1/upload.html')
+	return HttpResponse(t.render(locals(), request))
+```
+then add a template 
+```html
+<body>
+	<form method="post" action='' enctype="multipart/form-data"> {% csrf_token %}
+		{{ form.as_ul }}<br>
+		<input type="submit" value="submit">
+	</form>
+</body>
+```
+all done!!
