@@ -5,5 +5,6 @@ from . import views
 # format <index> will directly store string
 urlpatterns = [
     path('hello_world/<int:index>', views.hello_world),
+    path('upload', views.upload),
     path('', views.index),
 ]
